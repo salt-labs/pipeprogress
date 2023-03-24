@@ -104,9 +104,9 @@ jobs:
   # Publish Docker Container
   #########################
 
-  release_publish_docker:
+  release_publish_oci:
 
-    name: Publish Release to ${{ env.REGISTRY }}
+    name: Publish Release to registry
 
     needs:
       - test_container
