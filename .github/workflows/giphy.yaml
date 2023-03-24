@@ -44,6 +44,22 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            toolchain: stable
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            toolchain: stable
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            toolchain: stable
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            toolchain: stable
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            toolchain: stable
 
     steps:
       - id: wait_for_linter
@@ -52,7 +68,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: GitHub Super-Linter
+          checkName: GitHub Super-Linter (${{ matrix.os }})
 
       - id: wait_for_rust
         name: Wait for Rust (${{ matrix.os }})
@@ -60,7 +76,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: Cargo Test
+          checkName: Cargo Test (${{ matrix.target }}, ${{ matrix.os }}, ${{ matrix.toolchain }})
 
       - id: wait_for_docker
         name: Wait for Docker (${{ matrix.os }})
@@ -68,7 +84,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: Test Container
+          checkName: Test Container (${{ matrix.os }})
 
       - id: pr_comment_thumbs_up
         name: PR Comment (Thumbs Up)

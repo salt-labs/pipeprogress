@@ -46,3 +46,42 @@ pub fn read_loop(
     let _ = write_tx.send(Vec::new());
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crossbeam::channel::unbounded;
+    use std::fs::File;
+    use std::io::Write;
+
+    #[test]
+    fn test_read_loop() -> Result<()> {
+        // Create a test file with some content
+        let test_input = "test_input.txt";
+        let test_data = "Pipe Progress...";
+        let mut file = File::create(test_input)?;
+        file.write_all(test_data.as_bytes())?;
+
+        // Set up channels
+        let (stats_tx, _stats_rx) = unbounded();
+        let (write_tx, write_rx) = unbounded();
+
+        // Test read_loop
+        read_loop(Some(test_input), stats_tx.clone(), write_tx.clone())?;
+
+        let mut received_data = Vec::new();
+        while let Ok(chunk) = write_rx.recv() {
+            if chunk.is_empty() {
+                break;
+            }
+            received_data.extend(chunk);
+        }
+
+        assert_eq!(test_data.as_bytes(), received_data.as_slice());
+
+        // Clean up the test file
+        std::fs::remove_file(test_input)?;
+
+        Ok(())
+    }
+}
