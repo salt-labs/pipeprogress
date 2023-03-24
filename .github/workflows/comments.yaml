@@ -1,0 +1,99 @@
+---
+name: Comments
+
+on:
+  issue_comment:
+    types:
+      - created
+      - edited
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+  deployments: read
+  statuses: read
+
+env:
+  ORGANISATION: ${{ github.repository_owner }}
+  PROJECT: ${{ github.event.repository.name }}
+
+  # Works on pushes or PRs
+  BRANCH_NAME_CURRENT: ${{ github.head_ref || github.ref_name }}
+  BRANCH_NAME_DEFAULT: ${{ github.event.repository.default_branch }}
+
+jobs:
+  ##################################################
+  # Posts Giphy comments on '/giphy search_term'
+  ##################################################
+
+  giphy:
+    name: Giphy
+
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 5
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+      - id: giphy
+        name: Giphy image search
+        uses: IAmHughes/giphy-generator@v1.0.0
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GIPHY_TOKEN: "${{ secrets.GIPHY_TOKEN }}"
+        with:
+          rating: "PG-13" # G, PG, PG-13, R
+          lang: "en"
+
+  ##################################################
+  # Send a notification to Discord
+  ##################################################
+
+  discord:
+    name: Discord
+
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 5
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+    steps:
+      - name: Post message to Discord
+        id: discord_message
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_DISCORD }}
+          PING: "@CI"
+          MESSAGE: |
+            A ${{ github.event_name }} event was triggered in the ${{ github.repository }} repository.
+
+            ${{ github.event.comment.html_url }}
+        run: |
+          if [[ "${WEBHOOK_URL:-EMPTY}" == "EMPTY" ]];
+          then
+            echo "WEBHOOK_URL is not set"
+            exit 1
+          fi
+          sudo apt install jq --yes
+          JSON_CONTENT=$(jq -n --arg 'content' "${PING} ${MESSAGE}" '$ARGS.named')
+          curl \
+          --verbose \
+          --request POST \
+          --header "Content-Type: application/json" \
+          --data "${JSON_CONTENT}" \
+          "${WEBHOOK_URL}"

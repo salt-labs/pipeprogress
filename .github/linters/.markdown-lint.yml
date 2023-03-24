@@ -1,0 +1,23 @@
+##################################################
+#
+# Name: .markdown-lint.yml
+# Description: Markdown linter configuration
+#
+##################################################
+
+# Disable hard tabs
+no-hard-tabs: true
+
+# Unordered list indentation
+MD007:
+  indent: 4
+
+# Trailing spaces
+MD009:
+  br_spaces: 2
+
+# Line length
+MD013: false
+
+# Inline HTML
+MD033: false

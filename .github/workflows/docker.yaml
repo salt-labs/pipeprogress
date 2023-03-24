@@ -1,0 +1,174 @@
+---
+##################################################
+# Name: docker.yaml
+# Description: Workflow to test containers with Docker
+##################################################
+
+name: Docker
+
+on:
+
+  push:
+    branches:
+      - trunk
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+
+  pull_request:
+    branches:
+      - trunk
+      - release/*
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - review_requested
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+
+env:
+
+  REGISTRY: ghcr.io
+  REGISTRY_USERNAME: ${{ github.actor }}
+  REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+  ORGANISATION: ${{ github.repository_owner }}
+  PROJECT: ${{ github.event.repository.name }}
+
+  # Works on pushes or PRs
+  BRANCH_NAME_CURRENT: ${{ github.head_ref || github.ref_name }}
+  BRANCH_NAME_DEFAULT: ${{ github.event.repository.default_branch }}
+
+
+defaults:
+
+  run:
+    shell: bash
+
+jobs:
+
+  #########################
+  # Perform basic container tests
+  #########################
+
+  test_container:
+
+    name: Test Container
+
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+
+      - id: checkout_repository
+        name: Checkout repository
+        uses: actions/checkout@v2
+
+      - id: pull_request_source_dest_branch
+        name: Pull request source and destination branch
+        env:
+          BRANCH_SOURCE: ${{ github.head_ref }}
+          BRANCH_DEST: ${{ github.base_ref }}
+        run: |
+          echo "Pull Request Source: ${BRANCH_SOURCE}"
+          echo "Pull Request Destination: ${BRANCH_DEST}"
+        if: github.event_name == 'pull_request'
+
+      - id: docker_build
+        name: Docker Image Build
+        run: >
+          docker image build
+          --rm
+          --tag test:latest
+          .
+
+      - id: docker_test
+        name: Docker Test Container
+        run: >
+          docker container run
+          --rm
+          --name test
+          test:latest
+
+  #########################
+  # Publish Docker Container
+  #########################
+
+  release_publish_oci:
+
+    name: Publish Release to registry
+
+    needs:
+      - test_container
+
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+
+      - id: checkout_repository
+        name: Checkout repository with all history and tags
+        uses: actions/checkout@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          fetch-depth: 0
+          submodules: false
+          clean: true
+          persist-credentials: true
+
+      - id: setup_qemu
+        name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - id: setup_buildx
+        name: Setup BuildX
+        uses: docker/setup-buildx-action@v1
+
+      - id: login
+        name: Login to Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+
+      - id: meta
+        name: Define Container metadata
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.ORGANISATION }}/${{ env.PROJECT }}
+          flavor: |
+            latest=true
+          tags: |
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=tag
+
+      - id: build
+        name: Build and push Container image
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ matrix.config.folder }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=latest

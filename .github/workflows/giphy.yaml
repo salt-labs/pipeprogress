@@ -1,0 +1,91 @@
+---
+##################################################
+# Name: giphy.yaml
+# Description:
+#   A Workflow that post giphy pics in PRs.
+##################################################
+
+name: Giphy
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+  deployments: read
+  statuses: read
+
+env:
+  ORGANISATION: ${{ github.repository_owner }}
+  PROJECT: ${{ github.event.repository.name }}
+
+  # Works on pushes or PRs
+  BRANCH_NAME_CURRENT: ${{ github.head_ref || github.ref_name }}
+  BRANCH_NAME_DEFAULT: ${{ github.event.repository.default_branch }}
+
+jobs:
+  check:
+    name: Giphy status check
+
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-latest
+
+    steps:
+      - id: wait_for_linter
+        name: Wait for Linter (${{ matrix.os }})
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          checkName: GitHub Super-Linter (${{ matrix.os }})
+
+      - id: wait_for_docker
+        name: Wait for Docker (${{ matrix.os }})
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          checkName: Publish Release to registry (${{ matrix.os }})
+
+      - id: pr_comment_thumbs_up
+        name: PR Comment (Thumbs Up)
+        if: ${{ steps.wait_for_linter.outputs.conclusion == 'success' && steps.wait_for_linter.outputs.conclusion == 'success' }}
+        uses: exercism/pr-commenter-action@v1.4.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: .github/pr-comments/thumbs_up.yaml
+          template-variables: |
+            {
+              "id": "${{ github.sha }}-thumbs",
+              "onCreate": "create",
+              "onUpdate": "recreate"
+            }
+
+      - id: pr_comment_thumbs_down
+        name: PR Comment (Thumbs Down)
+        if: ${{ steps.wait_for_docker.outputs.conclusion != 'success' || steps.wait_for_docker.outputs.conclusion != 'success' }}
+        uses: exercism/pr-commenter-action@v1.4.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: .github/pr-comments/thumbs_down.yaml
+          template-variables: |
+            {
+              "id": "${{ github.sha }}-thumbs",
+              "onCreate": "create",
+              "onUpdate": "recreate"
+            }
