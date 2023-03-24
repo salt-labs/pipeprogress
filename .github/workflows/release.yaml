@@ -80,7 +80,7 @@ jobs:
       # ${MAJOR}.${MINOR}.${PATCH}-${PRE-RELEASE}+${BUILD}
       - id: prep_release
         name: Prepare for Release
-        uses: salt-labs/action-ship-it@trunk
+        uses: salt-labs/action-its-shipping-time@trunk
         with:
           loglevel: "INFO"
           tag_enable: "TRUE"
