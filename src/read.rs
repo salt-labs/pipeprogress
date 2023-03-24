@@ -11,13 +11,16 @@ use crossbeam::channel::Sender;
 use std::fs::File;
 use std::io::{self, BufReader, Read, Result};
 
-// Public function to read the infile or stdin
-pub fn read_loop(infile: &str, stats_tx: Sender<usize>, write_tx: Sender<Vec<u8>>) -> Result<()> {
+// Update the function signature to accept Option<&str> for infile
+pub fn read_loop(
+    infile: Option<&str>,
+    stats_tx: Sender<usize>,
+    write_tx: Sender<Vec<u8>>,
+) -> Result<()> {
     // Read from a file if provided, otherwise default to stdin
-    let mut reader: Box<dyn Read> = if !infile.is_empty() {
-        Box::new(BufReader::new(File::open(infile)?))
-    } else {
-        Box::new(BufReader::new(io::stdin()))
+    let mut reader: Box<dyn Read> = match infile {
+        Some(path) => Box::new(BufReader::new(File::open(path)?)),
+        None => Box::new(BufReader::new(io::stdin())),
     };
 
     let mut buffer = [0; CHUNK_SIZE];

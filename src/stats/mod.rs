@@ -11,7 +11,7 @@ mod timer;
 use crossbeam::channel::Receiver;
 use crossterm::{
     cursor, execute,
-    style::{self, Color, PrintStyledContent},
+    style::{self, Color, PrintStyledContent, Stylize},
     terminal::{Clear, ClearType},
 };
 use std::io::{self, Result, Stderr, Write};
@@ -91,18 +91,22 @@ fn output_progress(stderr: &mut Stderr, bytes: usize, elapsed: String, rate: f64
     #![allow(deprecated)]
 
     // Style bytes in red after converting to a string
-    let bytes = style::style(format!("{} ", bytes)).with(Color::Red);
+    let bytes = style::style(format!("{} ", bytes))
+        .stylize()
+        .with(Color::Red);
 
     // Style elapsed time in green
-    let elapsed = style::style(elapsed).with(Color::Green);
+    let elapsed = style::style(elapsed).stylize().with(Color::Green);
 
     // Style the bps rate in Blue
-    let rate = style::style(format!(" [{rate:.0}b/s]", rate = rate)).with(Color::Blue);
+    let rate = style::style(format!(" [{rate:.0}b/s]", rate = rate))
+        .stylize()
+        .with(Color::Blue);
 
     // Output the progress to stderr
     let _ = execute!(
         stderr,
-        cursor::MoveToColumn(0),       // Move to position 0 (far left)
+        cursor::MoveToColumn(1),       // Move to position 0 (far left)
         Clear(ClearType::CurrentLine), // Clear the current line
         PrintStyledContent(bytes),     // Display the bytes
         PrintStyledContent(elapsed),   // Display the elapsed time

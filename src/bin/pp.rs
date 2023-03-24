@@ -31,9 +31,10 @@ fn main() -> Result<()> {
     let (stats_tx, stats_rx) = unbounded();
     let (write_tx, write_rx) = bounded(1024);
 
-    let read_handle = thread::spawn(move || read::read_loop(&infile, stats_tx, write_tx));
+    // Convert infile and outfile to Option<&str>
+    let read_handle = thread::spawn(move || read::read_loop(infile.as_deref(), stats_tx, write_tx));
     let stats_handle = thread::spawn(move || stats::stats_loop(silent, stats_rx));
-    let write_handle = thread::spawn(move || write::write_loop(&outfile, write_rx));
+    let write_handle = thread::spawn(move || write::write_loop(outfile.as_deref(), write_rx));
 
     // Crash the entire program if any threads have crashed
     let read_io_result = read_handle.join().unwrap();

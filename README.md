@@ -12,6 +12,7 @@
     - [Pre-build release](#pre-build-release)
     - [Cargo release](#cargo-release)
     - [From source](#from-source)
+  - [Examples](#examples)
 
 <!-- /TOC -->
 
@@ -67,4 +68,13 @@ cd pipeprogress
 cargo build --release
 
 ./target/release/pp --help
+```
+
+## Examples
+
+```bash
+dd if=/dev/urandom bs=1M count=1024 | pp | dd of=random_data.bin
+
+# Output is as follows; bytes, elapsed time, bps rate
+970997760 0:00:06 [6970429b/s]
 ```

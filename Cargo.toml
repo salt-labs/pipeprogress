@@ -6,20 +6,19 @@
 [package]
 
 name = "pipeprogress"
-version = "2020.6.4"
+version = "2023.3.0"
 authors = ["MAHDTech <MAHDTech@saltlabs.tech>"]
-edition = "2018"
+edition = "2021"
 description = "Progress bar for long pipe operations"
 readme = "README.md"
 homepage = "https://github.com/salt-labs/pipeprogress"
 repository = "https://github.com/salt-labs/pipeprogress"
-license = "Apache-2.0"
+license = "Unlicense"
 keywords = ["cli", "pipe"]
 publish = ["crates-io"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-
-clap = "2.33.1"
-crossbeam = "0.7.3"
-crossterm = "0.17.5"
+clap = { version = "4.1.13", features = ["derive"] }
+crossbeam = "0.8.2"
+crossterm = "0.26.1"

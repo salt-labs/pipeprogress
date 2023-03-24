@@ -9,13 +9,12 @@ use crossbeam::channel::Receiver;
 use std::fs::File;
 use std::io::{self, BufWriter, ErrorKind, Result, Write};
 
-// public function to read the infile or stdin
-pub fn write_loop(outfile: &str, write_rx: Receiver<Vec<u8>>) -> Result<()> {
+// Update the function signature to accept Option<&str> for outfile
+pub fn write_loop(outfile: Option<&str>, write_rx: Receiver<Vec<u8>>) -> Result<()> {
     // write to a file if provided, otherwise send to stdout
-    let mut writer: Box<dyn Write> = if !outfile.is_empty() {
-        Box::new(BufWriter::new(File::create(outfile)?))
-    } else {
-        Box::new(BufWriter::new(io::stdout()))
+    let mut writer: Box<dyn Write> = match outfile {
+        Some(path) => Box::new(BufWriter::new(File::create(path)?)),
+        None => Box::new(BufWriter::new(io::stdout())),
     };
 
     loop {

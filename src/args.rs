@@ -5,55 +5,37 @@
 //! Parses the command line arguments
 //!
 
-use clap::{App, Arg};
+use clap::Parser;
 use std::env;
 
-/// Data structure to hold Args
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
 pub struct Args {
-    pub infile: String,
-    pub outfile: String,
+    /// Read from a file instead of stdin
+    #[clap(short, long)]
+    pub infile: Option<String>,
+
+    /// Write to a file instead of stdout
+    #[clap(short, long)]
+    pub outfile: Option<String>,
+
+    /// Display no output
+    #[clap(short, long)]
     pub silent: bool,
 }
 
 /// Implementations for Args
 impl Args {
-    /// Public function to parse the command line arguments
+    /// Parses the command line arguments
     pub fn parse() -> Self {
-        let matches = App::new("pipeprogress")
-            .arg(
-                Arg::with_name("infile")
-                    .short("i")
-                    .long("infile")
-                    .takes_value(true)
-                    .help("Read from a file instead of stdin"),
-            )
-            .arg(
-                Arg::with_name("outfile")
-                    .short("o")
-                    .long("outfile")
-                    .takes_value(true)
-                    .help("Writes to a file instead of stdout"),
-            )
-            .arg(
-                Arg::with_name("silent")
-                    .short("s")
-                    .long("silent")
-                    .takes_value(false)
-                    .help("Display no output"),
-            )
-            .get_matches();
+        let args = Args::try_parse().unwrap_or_else(|e| e.exit());
 
-        let infile = matches.value_of("infile").unwrap_or_default().to_string();
+        let infile = args.infile;
 
-        let outfile = matches.value_of("outfile").unwrap_or_default().to_string();
+        let outfile = args.outfile;
 
-        let silent = if matches.is_present("silent") {
-            true
-        } else {
-            // If the environment variable PV_SILENT has been set,
-            // no matter whats contains, set to true
-            !env::var("PV_SILENT").unwrap_or_default().is_empty()
-        };
+        // If the environment variable PV_SILENT has been set, no matter its content, set silent to true
+        let silent = args.silent || !env::var("PV_SILENT").unwrap_or_default().is_empty();
 
         Self {
             infile,
