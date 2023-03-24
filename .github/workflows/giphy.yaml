@@ -60,7 +60,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: Test Container (${{ matrix.os }})
+          checkName: Publish Release to ghcr.io (${{ matrix.os }})
 
       - id: pr_comment_thumbs_up
         name: PR Comment (Thumbs Up)

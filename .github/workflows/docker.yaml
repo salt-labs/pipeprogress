@@ -106,7 +106,7 @@ jobs:
 
   release_publish_docker:
 
-    name: Publish Release to Docker
+    name: Publish Release to ${{ env.REGISTRY }}
 
     needs:
       - test_container
