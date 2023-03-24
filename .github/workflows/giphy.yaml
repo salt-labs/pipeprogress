@@ -44,10 +44,6 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-        python-version:
-          - "3.10"
-        poetry-version:
-          - "latest"
 
     steps:
       - id: wait_for_linter
@@ -56,7 +52,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: GitHub Super-Linter (${{ matrix.os }})
+          checkName: GitHub Super-Linter
+
+      - id: wait_for_rust
+        name: Wait for Rust (${{ matrix.os }})
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          checkName: Cargo Test
 
       - id: wait_for_docker
         name: Wait for Docker (${{ matrix.os }})
@@ -64,7 +68,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: Publish Python Project (${{ matrix.os }}, ${{ matrix.python-version }}, ${{ matrix.poetry-version }})
+          checkName: Test Container
 
       - id: pr_comment_thumbs_up
         name: PR Comment (Thumbs Up)
