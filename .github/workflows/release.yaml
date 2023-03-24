@@ -7,18 +7,25 @@ name: Release
 
 on:
 
+  # Treating approved PRs into trunk as "pre-releases"
+  pull_request_review:
+    branches:
+      - "trunk"
+    types:
+      - submitted
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - Cargo.lock
+      - Cargo.toml
+
+  # Treating merged PRs into trunk as "releases"
   push:
     branches:
-      - trunk
+      - "trunk"
     paths-ignore:
-      - Cargo.toml
-      - Cargo.lock
-
-  pull_request:
-    branches:
-      - trunk
-    types:
-      - ready_for_review
+      - "docs/**"
+      - "*.md"
 
 permissions:
   packages: write
@@ -80,12 +87,14 @@ jobs:
       # ${MAJOR}.${MINOR}.${PATCH}-${PRE-RELEASE}+${BUILD}
       - id: prep_release
         name: Prepare for Release
-        uses: salt-labs/action-ship-it@trunk
+        uses: salt-labs/action-its-shipping-time@trunk
         with:
           loglevel: "INFO"
           tag_enable: "TRUE"
           tag_force: "FALSE"
+          changelog_enable: "TRUE"
           git_pretty_format: "* %h %G? %aN - %s"
+          calver_enable: "TRUE"
           calver_scheme: "YYYY.MM.GEN"
           calver_split: "."
           calver_split_mod: "."
@@ -93,7 +102,7 @@ jobs:
 
       - id: create_release_prerelease
         name: Create Pre-Release
-        if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
+        if: github.event.review.state == 'approved'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -297,9 +306,9 @@ jobs:
   # Publish Docker Container
   #########################
 
-  release_publish_docker:
+  release_publish_oci:
 
-    name: Publish Release to Docker
+    name: Publish Release to registry
 
     needs:
       - create_release

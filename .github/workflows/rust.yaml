@@ -7,17 +7,9 @@ name: Rust
 
 on:
 
-  push:
-    branches:
-      - trunk
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-
   pull_request:
     branches:
       - trunk
-      - release/*
     types:
       - opened
       - reopened
@@ -68,9 +60,9 @@ jobs:
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             toolchain: stable
-          - target: aarch64-unknown-linux-gnu
-            os: ubuntu-latest
-            toolchain: stable
+          #- target: aarch64-unknown-linux-gnu
+          #  os: ubuntu-latest
+          #  toolchain: stable
         #exclude:
 
     steps:
@@ -83,9 +75,19 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           default: true
 
+      - id: setup_rust_arm64
+        name: Setup the Rust environment for ARM64
+        if: matrix.target == 'aarch64-unknown-linux-gnu' && matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt install gcc-multilib
+
       - id: checkout_repository
         name: Checkout repository
         uses: actions/checkout@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          persist-credentials: true
 
       - id: cache_artifacts_cargo_registry
         name: Cache Cargo registry
