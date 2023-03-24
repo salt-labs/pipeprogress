@@ -1,0 +1,22 @@
+# Thumbs down.
+
+comment:
+  on-create: "{{ onCreate }}"
+  on-update: "{{ onUpdate }}"
+
+  header: |
+    ## Status
+
+  footer: |
+    ---
+    /giphy thumbs down
+
+  snippets:
+    - id: "{{ id }}-any-file"
+      files:
+        - "*"
+        - "*.*"
+        - "**/*"
+        - "**/*.*"
+      body: |
+        :thumbsdown: One or more checks have failed!
