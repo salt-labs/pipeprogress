@@ -20,7 +20,7 @@ permissions:
   actions: read
   checks: read
   deployments: read
-  statuses: read
+  statuses: write
 
 defaults:
 
