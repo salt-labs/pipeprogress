@@ -108,8 +108,7 @@ jobs:
     name: Publish Release to Docker
 
     needs:
-      - create_release
-      - build_rust
+      - test_container
 
     runs-on: ${{ matrix.os }}
 
