@@ -44,22 +44,6 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            toolchain: stable
-          - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
-            toolchain: stable
-          - target: x86_64-apple-darwin
-            os: macos-latest
-            toolchain: stable
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
-            toolchain: stable
-          - target: aarch64-unknown-linux-gnu
-            os: ubuntu-latest
-            toolchain: stable
-        #exclude:
 
     steps:
       - id: wait_for_linter
@@ -69,14 +53,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           checkName: GitHub Super-Linter (${{ matrix.os }})
-
-      - id: wait_for_rust
-        name: Wait for Rust (${{ matrix.os }})
-        uses: fountainhead/action-wait-for-check@v1.1.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: Cargo Test (${{ matrix.target }}, ${{ matrix.os }}, ${{ matrix.toolchain }})
 
       - id: wait_for_docker
         name: Wait for Docker (${{ matrix.os }})
@@ -88,7 +64,7 @@ jobs:
 
       - id: pr_comment_thumbs_up
         name: PR Comment (Thumbs Up)
-        if: ${{ steps.wait_for_pages.outputs.conclusion == 'success' && steps.wait_for_poetry.outputs.conclusion == 'success' }}
+        if: ${{ steps.wait_for_linter.outputs.conclusion == 'success' && steps.wait_for_linter.outputs.conclusion == 'success' }}
         uses: exercism/pr-commenter-action@v1.4.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -102,7 +78,7 @@ jobs:
 
       - id: pr_comment_thumbs_down
         name: PR Comment (Thumbs Down)
-        if: ${{ steps.wait_for_pages.outputs.conclusion != 'success' || steps.wait_for_poetry.outputs.conclusion != 'success' }}
+        if: ${{ steps.wait_for_docker.outputs.conclusion != 'success' || steps.wait_for_docker.outputs.conclusion != 'success' }}
         uses: exercism/pr-commenter-action@v1.4.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
