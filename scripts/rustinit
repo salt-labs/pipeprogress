@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+
+##################################################
+# Name: rustinit
+# Description: initialises the folder structure for a new rust app
+##################################################
+
+clear
+
+#set -x                             # Enable debug
+set -E                              # Inherit ERR trap in functions
+set -e                              # Exit immediately on non-zero exit status
+set -u                              # Exit on unbound variable
+set -o pipefail                     # Fail on non-zero status from pipeline
+
+# Enable globbing (bashism)
+shopt -s globstar
+shopt -s extglob
+
+##################################################
+# Variables
+##################################################
+
+# Name of the script
+SCRIPT=${0##*/}
+
+##################################################
+# Functions
+##################################################
+
+pushd () {
+
+    command pushd "$@" > /dev/null
+
+}
+
+popd () {
+
+    command popd > /dev/null
+
+}
+
+function usage() {
+
+    clear
+    cat <<- EOF
+
+    Usage:
+
+        ${SCRIPT}
+
+EOF
+
+}
+
+function getConfirmation() {
+
+	local CHOICE
+
+    echo -e "\\n"
+    read -p "Y/N: " -n 1 -r CHOICE
+    echo -e "\\n"
+
+    # If the answer was anything other than a "Y" exit
+    if [[ ! "${CHOICE}" =~ ^[Yy]$ ]];
+    then
+        rustaceanGoodbye
+    else
+        return 0
+    fi
+
+}
+
+function getProjectType() {
+
+	local CHOICE
+
+    echo -e "\\n"
+    read -p "Are you creating a 'lib' or 'bin' rust project?: " -n 3 -r CHOICE
+    echo -e "\\n"
+
+	case "${CHOICE}" in
+
+		bin | app )
+
+			export TYPE="bin"
+
+		;;
+
+		lib | dep )
+
+			export TYPE="lib"
+
+		;;
+
+		* )
+
+			echo "Unknown choice entered of ${CHOICE}"
+			return 1
+
+		;;
+
+	esac
+
+	return 0
+
+}
+
+function rustaceanGoodbye() {
+
+    clear
+    echo -e "\\n"
+    echo -e "\\t\\tGoodbye, and may the crabs be with you"
+    echo -e "\\n"
+
+	cat <<- "EOF"
+
+	    _~^~^~_
+	\) /  o o  \ (/
+	  '_   u   _'
+	  \ '-----' /
+
+	EOF
+
+    exit 0
+
+}
+
+##################################################
+# Main
+##################################################
+
+pushd .
+
+PROJECT=$(basename "$(pwd)")
+
+getProjectType || { echo "Failed to determine project type" ; exit 1 ; }
+
+echo -e "Generate new Rust project ${PROJECT} of type ${TYPE} in $(pwd)"
+getConfirmation
+
+cargo new "${PROJECT}" --"${TYPE}" --vcs none
+
+popd
+
+exit 0

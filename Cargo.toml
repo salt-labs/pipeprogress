@@ -1,0 +1,25 @@
+##################################################
+# Cargo manifest
+# Reference: https://doc.rust-lang.org/cargo/reference/manifest.html
+##################################################
+
+[package]
+
+name = "pipeprogress"
+version = "2020.6.4"
+authors = ["MAHDTech <MAHDTech@saltlabs.tech>"]
+edition = "2018"
+description = "Progress bar for long pipe operations"
+readme = "README.md"
+homepage = "https://github.com/salt-labs/pipeprogress"
+repository = "https://github.com/salt-labs/pipeprogress"
+license = "Apache-2.0"
+keywords = ["cli", "pipe"]
+publish = ["crates-io"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+
+clap = "2.33.1"
+crossbeam = "0.7.3"
+crossterm = "0.17.5"

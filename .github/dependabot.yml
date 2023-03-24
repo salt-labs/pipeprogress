@@ -1,0 +1,101 @@
+##################################################
+#
+# Name: dependabot.yml
+# Description: Dependabot configuration fot GitHub native version
+# Reference: https://help.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates
+#
+##################################################
+
+version: 2
+
+updates:
+
+  #########################
+  # GitHub Actions
+  #########################
+
+  - package-ecosystem: "github_actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "00:00"
+      timezone: "Australia/Sydney"
+    default_labels:
+      - "dependencies"
+      - "dependabot"
+    target-branch: "trunk"
+    commit-message:
+      prefix: "github-actions"
+
+  #########################
+  # Git Submodules
+  #########################
+
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "00:00"
+      timezone: "Australia/Sydney"
+    default_labels:
+      - "dependencies"
+      - "dependabot"
+    target-branch: "trunk"
+    commit-message:
+      prefix: "gitsubmodules"
+
+  #########################
+  # Docker
+  #########################
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "00:00"
+      timezone: "Australia/Sydney"
+    default_labels:
+      - "dependencies"
+      - "dependabot"
+    target-branch: "trunk"
+    commit-message:
+      prefix: "docker"
+
+  #########################
+  # Go Modules
+  #########################
+
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "00:00"
+      timezone: "Australia/Sydney"
+    default_labels:
+      - "dependencies"
+      - "dependabot"
+    target-branch: "trunk"
+    commit-message:
+      prefix: "gomodules"
+
+  #########################
+  # Cargo crates
+  #########################
+
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "00:00"
+      timezone: "Australia/Sydney"
+    default_labels:
+      - "dependencies"
+      - "dependabot"
+    target-branch: "trunk"
+    commit-message:
+      prefix: "cargo"

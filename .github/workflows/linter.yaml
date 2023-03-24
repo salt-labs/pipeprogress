@@ -1,0 +1,77 @@
+##################################################
+# Name: linter.yaml
+# Description: Workflow for the GitHub Super-Linter
+##################################################
+
+# Reference: https://github.com/github/super-linter
+
+name: Linter
+
+on:
+
+  push:
+    branches-ignore:
+      - trunk
+
+defaults:
+
+  run:
+    shell: bash
+
+jobs:
+
+  #########################
+  # Run the GitHub Super-Linter
+  ########################
+
+  lint:
+
+    name: GitHub Super-Linter
+
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+
+      - id: checkout_repository
+        name: Checkout repository with all history and tags
+        uses: actions/checkout@trunk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          fetch-depth: 0
+          submodules: false
+          clean: true
+          persist-credentials: true
+
+      - id: run_linter
+        name: Run GitHub Super Linter
+        uses: github/super-linter@v2.0.0
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_YAML: false
+          VALIDATE_JSON: false
+          VALIDATE_XML: false
+          VALIDATE_MD: true
+          VALIDATE_BASH: true
+          VALIDATE_PERL: false
+          VALIDATE_PYTHON: false
+          VALIDATE_RUBY: false
+          VALIDATE_COFFEE: false
+          VALIDATE_ANSIBLE: false
+          VALIDATE_JAVASCRIPT_ES: false
+          VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_TYPESCRIPT_ES: false
+          VALIDATE_TYPESCRIPT_STANDARD: false
+          VALIDATE_DOCKER: true
+          VALIDATE_GO: false
+          VALIDATE_TERRAFORM: false
+          ANSIBLE_DIRECTORY: "/ansible"
+          ACTIONS_RUNNER_DEBUG: false
