@@ -42,7 +42,7 @@ jobs:
 
       - id: checkout_repository
         name: Checkout repository with all history and tags
-        uses: actions/checkout@trunk
+        uses: actions/checkout@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
