@@ -13,6 +13,15 @@ on:
     branches-ignore:
       - trunk
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+  deployments: read
+  statuses: read
+
 defaults:
 
   run:
@@ -55,6 +64,8 @@ jobs:
         name: Run GitHub Super Linter
         uses: github/super-linter@v4
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_ANSIBLE: false
           VALIDATE_BASH: true

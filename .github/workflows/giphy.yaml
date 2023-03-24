@@ -50,16 +50,16 @@ jobs:
           - "latest"
 
     steps:
-      - id: wait_for_pages
-        name: Wait for Cloudflare Pages (${{ matrix.os }}, ${{ matrix.python-version }}, ${{ matrix.poetry-version }})
+      - id: wait_for_linter
+        name: Wait for Linter (${{ matrix.os }})
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          checkName: Deploy website (${{ matrix.os }}, ${{ matrix.python-version }}, ${{ matrix.poetry-version }})
+          checkName: GitHub Super-Linter (${{ matrix.os }})
 
-      - id: wait_for_poetry
-        name: Wait for Poetry (${{ matrix.os }}, ${{ matrix.python-version }}, ${{ matrix.poetry-version }})
+      - id: wait_for_docker
+        name: Wait for Docker (${{ matrix.os }})
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
